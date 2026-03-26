@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="login.css">
+   
+</head>  
+
+<body>
+  <div class="ft">
+    <fieldset>
+      <legend>LOGIN</legend>
+      <form action="login" autocomplete="off">
+        <div id="wusername"><label for="username">USERNAME:</label>
+          <input type="text" id="username" placeholder="username">
+        </div>
+      
+      <div id="wpassword"><label for="PASSWORD">PASSWORD:</label>
+      <input type="password" id="PASSWORD" placeholder="password">
+      </div>
+      <div id="bottom">
+      <div id="checkbox"><input type="checkbox"><label>remember me</label></div><a href="#">forget password?</a>
+
+
+      </div>
+      <p id="error"></p>
+      </form>
+      <button onclick="login()" id="loginbuttion">LOGIN</button>
+
+
+    </fieldset>
+  </div>
+<script src="hi.js" defer></script>
+</body>
+
+</html>

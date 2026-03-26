@@ -1,0 +1,86 @@
+body{
+     background-image:url(ex.jpeg.jpg) ;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center center;
+            
+}
+       
+fieldset{
+    background-color: rgba(72, 18, 173, 0.367);
+    backdrop-filter: blur(5px);
+    height: 450px;
+    width: 400px;
+    border-radius: 20px;
+    border:1px solid white;
+  }
+.ft{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+div legend{
+    text-align: center;
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-size: 20px;
+    color: white;
+}   
+#username{
+    height: 30px;
+    width: 350px;
+}
+#wusername{
+    color: white;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-size: 30px;
+    margin-top: 35px;
+    margin-left: 15px;
+    
+}
+#PASSWORD{
+    height: 30px;
+    width: 350px;
+}
+#wpassword{
+     color: white;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-size: 30px;
+    margin-top: 45px;
+    margin-left: 15px;
+    
+}
+label{
+    color: white;
+}
+#bottom{
+    margin-top: 70px;
+    display:flex;
+    gap:170px;
+
+}
+a{
+    color: white;
+}
+#loginbuttion{
+    margin-left: 150px;
+    /* margin-top: 50px; */
+    height: 40px;
+    width: 90px;
+    background-color:red;
+    color: white;
+    transition: 0.2s;
+
+}
+#loginbuttion:hover{
+    cursor: pointer;
+    background-color:blue;
+    transform: scale(1.1);
+
+}
+#error{
+    color: red;
+}
+
+

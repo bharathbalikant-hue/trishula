@@ -1,0 +1,88 @@
+*{
+    margin: 0%;
+    padding: 0%;
+}
+
+body{
+    background-color: black;
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    
+}
+.container{
+    min-height: 200px;
+    width: 500px;
+    background-color: rgba(30, 4, 110, 0.766);
+    border-radius: 7px;
+    position: relative;
+    right: 80px;
+    bottom:39px;
+    
+}
+#text{
+    height: 75px;
+    width: 430px;
+    margin-left: 35px;
+    margin-top:20px;
+    border-radius: 2px;
+    border: none;
+}
+#text::placeholder{
+    position: relative;
+    bottom: 15px;
+    left: 5px;
+}
+h1{
+    color: aqua;
+    position: relative;
+    bottom: 310px;
+    left: 230px;
+
+}
+span{
+    color: orange;
+    margin-left: 10px;
+}
+#hi{
+    background-color: blue;
+    color: white;
+    height: 35px;
+    width: 70px;
+    border-radius: 3px;
+    border: none;
+    position: relative;
+    left: 200px;
+    top:20px;
+    transition: 0.3s ease;
+    }
+button:hover{
+    transform: scale(1.1);
+}
+li{
+    color: white;
+   margin-left: 30px;
+    margin-bottom: 23px;
+    font-size: 22px;
+}
+ul{
+    margin-top: 39px;
+}
+.wrong{
+    background-color: rgba(30, 4, 110, 0.766);
+    border: none;
+    margin-left: 10px;
+}
+.tick{
+    background-color:  rgba(30, 4, 110, 0.766);
+    border: none;
+    margin-left: 10px;
+
+
+}
+.ticked{
+    text-decoration: line-through;
+    color:gray;
+
+}

@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AgriPredict — Farm Optimizer (Single File) — Voice Enabled</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{--accent:#16a34a;--muted:#6b7280}
+    body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Noto Sans',sans-serif;background:linear-gradient(180deg,#f0f9ff,#e0f2fe);color:#0f172a}
+    .hero{min-height:240px;display:flex;align-items:center;justify-content:center;text-align:center;background-image:url('https://images.unsplash.com/photo-1501004318641-b39e6451bec6?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=7bdc7d1fb5b0ae3f7f7a5dd22b6f0a6e');background-size:cover;background-position:center;position:relative;border-radius:10px}
+    .hero::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,6,23,0.45),rgba(2,6,23,0.2));border-radius:10px}
+    .hero-inner{position:relative;z-index:2;padding:24px;color:white}
+    .card{background:white;border-radius:12px;box-shadow:0 8px 30px rgba(2,6,23,.06);padding:18px}
+    .result-box{background:#f8fafc;border-left:4px solid var(--accent);padding:14px;border-radius:8px}
+    .muted{color:var(--muted)}
+    pre{background:#0b1220;color:#d1fae5;padding:12px;border-radius:8px;overflow:auto;white-space:pre-wrap}
+    .small{font-size:.9rem}
+    #imagePreview{max-width:100%;height:auto;border-radius:8px;margin-top:8px;display:none;border:1px solid #e5e7eb;padding:4px;background:white}
+    #videoPreview{width:100%;max-width:320px;height:200px;border-radius:8px;display:none;background:#000;margin-top:8px}
+    .camera-controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .error-msg{color:#b91c1c; font-size:0.95rem; margin-top:6px;}
+    .status-msg{color:#065f46; font-size:0.95rem; margin-top:6px;}
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+  </style>
+</head>
+<body class="antialiased">
+  <main class="max-w-5xl mx-auto p-6">
+    <section class="hero mb-6">
+      <div class="hero-inner">
+        <h1 class="text-3xl font-extrabold">AgriPredict</h1>
+        <p class="mt-2 text-lg">AI-assisted crop & pest suggestions — instant, farmer-friendly, bilingual (English / తెలుగు)</p>
+        <div class="mt-4">
+          <button id="langBtn" class="px-4 py-2 rounded-md bg-white text-green-700 font-semibold small">Switch to తెలుగు</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Input/Controls -->
+      <div class="card">
+        <h2 class="text-xl font-bold mb-3" id="formTitle">Input Farm Data</h2>
+        <form id="farmForm" onsubmit="return false;">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium muted" id="labelCrop">Search or select crop</label>
+              <input id="crop" list="cropList" type="text" placeholder="e.g., Wheat, Rice, Tomato..." class="mt-1 block w-full rounded-md border-gray-200 shadow-sm p-2" required>
+              <datalist id="cropList">
+                <!-- (same options as before) -->
+                <option value="amla">Amla</option>
+                <option value="apple">Apple</option>
+                <option value="bajra">Bajra (Pearl Millet)</option>
+                <option value="banana">Banana</option>
+                <option value="barley">Barley</option>
+                <option value="blackgram">Blackgram (Urad)</option>
+                <option value="chickpea">Chickpea (Gram)</option>
+                <option value="cotton">Cotton</option>
+                <option value="cabbage">Cabbage</option>
+                <option value="cauliflower">Cauliflower</option>
+                <option value="corn">Corn (Maize)</option>
+                <option value="date">Date</option>
+                <option value="eggplant">Eggplant (Brinjal)</option>
+                <option value="finger millet">Finger Millet (Ragi)</option>
+                <option value="greengram">Greengram (Moong)</option>
+                <option value="groundnut">Groundnut (Peanut)</option>
+                <option value="guar">Guar</option>
+                <option value="hemp">Hemp</option>
+                <option value="jowar">Jowar (Sorghum)</option>
+                <option value="kodo millet">Kodo Millet</option>
+                <option value="lentil">Lentil (Masoor)</option>
+                <option value="maize">Maize</option>
+                <option value="mustard">Mustard</option>
+                <option value="mango">Mango</option>
+                <option value="millets">Millets (General)</option>
+                <option value="neem">Neem (for agroforestry)</option>
+                <option value="onion">Onion</option>
+                <option value="pigeonpea">Pigeonpea (Tur/Arhar)</option>
+                <option value="potato">Potato</option>
+                <option value="paddy">Paddy (Rice)</option>
+                <option value="pulses">Pulses (General)</option>
+                <option value="quinoa">Quinoa</option>
+                <option value="rice">Rice</option>
+                <option value="radish">Radish</option>
+                <option value="ragi">Ragi (Finger Millet)</option>
+                <option value="sesame">Sesame</option>
+                <option value="soybean">Soybean</option>
+                <option value="sugarcane">Sugarcane</option>
+                <option value="sunflower">Sunflower</option>
+                <option value="tomato">Tomato</option>
+                <option value="turmeric">Turmeric</option>
+                <option value="vegetables">Vegetables (General)</option>
+                <option value="wheat">Wheat</option>
+                <option value="watermelon">Watermelon</option>
+                <option value="yam">Yam</option>
+                <option value="zucchini">Zucchini</option>
+                <option value="chilli">Chilli</option>
+                <option value="okra">Okra (Ladyfinger)</option>
+                <option value="brinjal">Brinjal (Eggplant)</option>
+                <option value="sorghum">Sorghum (Jowar)</option>
+                <option value="pearl millet">Pearl Millet (Bajra)</option>
+                <option value="mustard oilseed">Mustard Oilseed</option>
+                <option value="castor">Castor</option>
+                <option value="tobacco">Tobacco</option>
+                <option value="jute">Jute</option>
+                <option value="safflower">Safflower</option>
+                <option value="linseed">Linseed (Flax)</option>
+                <option value="cowpea">Cowpea</option>
+                <option value="horsegram">Horsegram</option>
+                <option value="moth bean">Moth Bean</option>
+                <option value="cluster bean">Cluster Bean (Guar)</option>
+                <option value="ginger">Ginger</option>
+                <option value="garlic">Garlic</option>
+                <option value="coconut">Coconut</option>
+                <option value="cashew">Cashew</option>
+                <option value="areca nut">Arecanut</option>
+                <option value="betel vine">Betel Vine</option>
+                <option value="rubber">Rubber</option>
+                <option value="tea">Tea</option>
+                <option value="coffee">Coffee</option>
+                <option value="cardamom">Cardamom</option>
+                <option value="pepper">Black Pepper</option>
+                <option value="vanilla">Vanilla</option>
+              </datalist>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium muted" id="labelRegion">Region</label>
+              <select id="region" class="mt-1 block w-full rounded-md border-gray-200 shadow-sm" required>
+                <option value="">Choose Region</option>
+                <option value="north">North India</option>
+                <option value="south">south India</option>
+                <option value="east">East India</option>
+                <option value="west">West India</option>
+                <option value="central">Central India</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font medium muted" id="labelPh">Soil pH</label>
+              <input id="ph" type="number" step="0.1" min="3.5" max="9.0" placeholder="6.5" class="mt-1 block w-full rounded-md border-gray-200 shadow-sm" required>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium muted" id="labelMoist">Soil Moisture (%)</label>
+              <input id="moisture" type="number" min="0" max="100" placeholder="65" class="mt-1 block w-full rounded-md border-gray-200 shadow-sm" required>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium muted" id="labelTemp">Avg Temp (°C)</label>
+              <input id="temp" type="number" step="0.1" min="0" max="60" placeholder="25.5" class="mt-1 block w-full rounded-md border-gray-200 shadow-sm" required>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium muted" id="labelRain">Rainfall (mm)</label>
+              <input id="rain" type="number" min="0" max="5000" placeholder="750" class="mt-1 block w-full rounded-md border-gray-200 shadow-sm" required>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-medium muted" id="labelNotes">Notes (optional)</label>
+              <textarea id="notes" rows="3" class="mt-1 block w-full rounded-md border-gray-200 shadow-sm" placeholder="Previous crop, issues noticed, irrigation type..."></textarea>
+            </div>
+
+            <!-- Camera / Upload input -->
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-medium muted">Plant Photo (optional)</label>
+
+              <!-- file upload fallback -->
+              <input id="imageUpload" type="file" accept="image/*" class="mt-1 block w-full rounded-md border-gray-200 shadow-sm p-2 small">
+
+              <!-- camera controls -->
+              <div class="camera-controls">
+                <button id="openCameraBtn" type="button" class="px-3 py-2 rounded-md bg-blue-600 text-white small">Take Photo</button>
+                <button id="captureBtn" type="button" class="px-3 py-2 rounded-md bg-green-600 text-white small" disabled>Capture</button>
+                <button id="stopCameraBtn" type="button" class="px-3 py-2 rounded-md border small" disabled>Stop</button>
+              </div>
+
+              <div id="cameraError" class="error-msg" style="display:none;"></div>
+              <div id="cameraStatus" class="status-msg" style="display:none;"></div>
+
+              <!-- video preview (hidden until camera opened) -->
+              <video id="videoPreview" autoplay playsinline muted></video>
+
+              <!-- captured/upload preview -->
+              <img id="imagePreview" alt="Plant preview">
+
+              <p class="text-xs muted mt-2">Tip: Use the camera to take a photo, or upload one. Captured image will be shown as a preview and can be included with your prompt.</p>
+            </div>
+            <!-- END camera/upload input -->
+
+          </div>
+
+          <div class="mt-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <button id="predictBtn" class="py-3 rounded-md text-white font-semibold" style="background:linear-gradient(135deg,var(--accent),#15803d)">Get Suggestions & Prediction</button>
+            </div>
+
+            <div class="mt-3">
+              <input id="lovUrl" type="url" placeholder="optional inpuit text" class="mt-1 block w-full rounded-md border-gray-200 shadow-sm p-2 small" />
+              <p class="text-xs muted mt-2">If a LovABLE webhook URL is provided, "Send to LovABLE" will POST the prompt there. Otherwise it will attempt POST to <code>/api/lovable</code>.</p>
+            </div>
+          </div>
+
+          <p class="text-sm muted mt-3">Tip: For production, call your LLM from a server (keep API keys secret).</p>
+        </form>
+      </div>
+
+      <!-- Results -->
+      <div class="card">
+        <h3 class="text-lg font-bold mb-2" id="resultTitle">Prediction & Recommendations</h3>
+        <div id="resultArea" class="space-y-4">
+          <div id="yieldBox" class="result-box">
+            <p class="text-sm muted">Predicted Yield</p>
+            <p id="yieldVal" class="text-2xl font-extrabold">— tons/ha</p>
+            <p id="yieldNote" class="text-sm muted">Use recommendations to increase yield</p>
+          </div>
+
+          <div class="card p-3">
+            <h4 class="font-semibold">Top Crop Suggestions</h4>
+            <ul id="cropListOut" class="list-disc ml-5 mt-2 muted"></ul>
+          </div>
+
+          <div class="card p-3">
+            <h4 class="font-semibold">Likely Pests & Diseases</h4>
+            <ul id="pestList" class="list-disc ml-5 mt-2 muted"></ul>
+          </div>
+
+          <div class="card p-3">
+            <h4 class="font-semibold">Pesticide / Low-cost Control Suggestions</h4>
+            <ul id="pesticideList" class="list-disc ml-5 mt-2 muted"></ul>
+            <p class="text-xs muted mt-2">Notes: prefer IPM (cultural controls, neem/biopesticides, pheromone traps). Follow label dosages and local regulation.</p>
+          </div>
+
+          <div class="card p-3">
+            <h4 class="font-semibold">Actionable Recommendations</h4>
+            <ol id="actionList" class="list-decimal ml-5 mt-2 muted"></ol>
+          </div>
+
+          <div class="card p-3">
+            <h4 class="font-semibold">Suggestions</h4>
+            <pre id="lovPrompt" class="small">See here for suggestions</pre>
+          </div>
+
+          <!-- Voice controls -->
+          <div class="card p-3">
+            <h4 class="font-semibold">Voice Output</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+              <div>
+                <label class="block text-sm muted">Voice</label>
+                <select id="voiceSelect" class="mt-1 block w-full rounded-md border-gray-200 shadow-sm"></select>
+              </div>
+
+              <div>
+                <label class="block text-sm muted">Language</label>
+                <select id="voiceLang" class="mt-1 block w-full rounded-md border-gray-200 shadow-sm">
+                  <option value="en">English (en)</option>
+                  <option value="te">తెలుగు (te)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm muted">Rate <span id="rateVal">1</span></label>
+                <input id="rate" type="range" min="0.5" max="2" step="0.1" value="1" class="w-full">
+              </div>
+
+              <div>
+                <label class="block text-sm muted">Pitch <span id="pitchVal">1</span></label>
+                <input id="pitch" type="range" min="0.5" max="2" step="0.1" value="1" class="w-full">
+              </div>
+
+              <div class="sm:col-span-2 flex gap-2 mt-2">
+                <button id="speakBtn" class="py-2 px-3 rounded-md bg-green-600 text-white">Speak Output</button>
+                <button id="stopBtn" class="py-2 px-3 rounded-md border">Stop</button>
+                <button id="readSummaryBtn" class="py-2 px-3 rounded-md border">Read Short Summary</button>
+              </div>
+            </div>
+
+            <p class="text-xs muted mt-2">Uses your browser's Speech Synthesis. If a Telugu voice isn't available, the engine will attempt to speak Telugu text using the selected voice's language setting.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="mt-6 text-center muted">
+      <p>Note: This tool gives general guidance. For field-specific advice, contact your local Krishi Vigyan Kendra.</p>
+    </footer>
+  </main>
+
+  <script>
+    // ========== CONFIG ==========
+    // If you have a Plant.id API key, paste it here to enable reliable plant detection.
+    // Otherwise leave empty to use the offline green-heuristic fallback.
+    const PLANT_ID_API_KEY = ''; // <-- put your Plant.id API key here (or leave blank)
+
+    // Confidence threshold for Plant.id (0.0 - 1.0)
+    const PLANT_ID_CONFIDENCE_THRESHOLD = 0.60;
+
+    // Offline green heuristic threshold (fraction of green-ish pixels)
+    const GREEN_RATIO_THRESHOLD = 0.15;
+
+    // ========= UI & state ==========
+    const langBtn = document.getElementById('langBtn');
+    let lang = 'en';
+    const cameraError = document.getElementById('cameraError');
+    const cameraStatus = document.getElementById('cameraStatus');
+    const predictBtn = document.getElementById('predictBtn');
+
+    let plantValidated = true; // default true when no image
+    function updatePredictState(){
+      // disable predict if image present and not validated
+      const hasImage = imagePreview.src && imagePreview.style.display !== 'none';
+      predictBtn.disabled = !!(hasImage && !plantValidated);
+    }
+
+    function setCameraStatus(msg){
+      if(!msg){ cameraStatus.style.display = 'none'; cameraStatus.textContent = ''; }
+      else { cameraStatus.style.display = 'block'; cameraStatus.textContent = msg; }
+    }
+    function showCameraError(msg){
+      cameraError.style.display = msg ? 'block' : 'none';
+      cameraError.textContent = msg || '';
+    }
+    function setPlantValidation(valid, reason){
+      plantValidated = !!valid;
+      if(valid){
+        setCameraStatus('✅ Image validated as plant.' + (reason ? ' — ' + reason : ''));
+        showCameraError('');
+      } else {
+        setCameraStatus('');
+        // REJECT: clear preview and file input immediately, show error
+        showCameraError('❌ Image rejected — not a plant.' + (reason ? ' — ' + reason : ''));
+        clearImageInputs();
+      }
+      updatePredictState();
+    }
+
+    function clearImageInputs(){
+      // clear preview and file input
+      imagePreview.src = '';
+      imagePreview.style.display = 'none';
+      imageUpload.value = '';
+      lastUploadedFile = null;
+      lastDataUrl = null;
+      // also stop camera if running
+      stopCamera();
+    }
+
+    // --- Language toggle (unchanged) ---
+    const texts = {
+      en: {
+        switch: 'Switch to తెలుగు',
+        formTitle: 'Input Farm Data',
+        resultTitle: 'Prediction & Recommendations',
+        labelCrop: 'Search or select crop',
+        labelRegion: 'Region',
+        labelPh: 'Soil pH',
+        labelMoist: 'Soil Moisture (%)',
+        labelTemp: 'Avg Temp (°C)',
+        labelRain: 'Rainfall (mm)',
+        labelNotes: 'Notes (optional)'
+      },
+      te: {
+        switch: 'Switch to English',
+        formTitle: 'ఫారం డేటా నమోదు చేయండి',
+        resultTitle: 'ఊహాజనితం & సిఫార్సులు',
+        labelCrop: 'పంట ఎంచుకోండి లేదా శోధించండి',
+        labelRegion: 'ప్రాంతం',
+        labelPh: 'మట్టి pH',
+        labelMoist: 'మట్టి తేమ (%)',
+        labelTemp: 'సగటు ఉష్ణోగ్రత (°C)',
+        labelRain: 'వర్షపాతం (mm)',
+        labelNotes: 'గమనికలు (ఐచ్ఛికం)'
+      }
+    };
+    function setLanguage(to){
+      lang = to;
+      const t = texts[lang];
+      document.getElementById('formTitle').textContent = t.formTitle;
+      document.getElementById('resultTitle').textContent = t.resultTitle;
+      document.getElementById('labelCrop').textContent = t.labelCrop;
+      document.getElementById('labelRegion').textContent = t.labelRegion;
+      document.getElementById('labelPh').textContent = t.labelPh;
+      document.getElementById('labelMoist').textContent = t.labelMoist;
+      document.getElementById('labelTemp').textContent = t.labelTemp;
+      document.getElementById('labelRain').textContent = t.labelRain;
+      document.getElementById('labelNotes').textContent = t.labelNotes;
+      langBtn.textContent = t.switch;
+      const voiceLang = document.getElementById('voiceLang');
+      if(voiceLang) voiceLang.value = (lang === 'te') ? 'te' : 'en';
+    }
+    langBtn.addEventListener('click', ()=> setLanguage(lang === 'en' ? 'te' : 'en'));
+    setLanguage('en');
+
+    // --- (rest of your existing helpers remain unchanged) ---
+    const cropsByPh = [
+      {min:0, max:5.5, crops:['Rice','Potato','Millet']},
+      {min:5.5, max:6.5, crops:['Tomato','Chilli','Maize','Groundnut']},
+      {min:6.5, max:7.5, crops:['Wheat','Sugarcane','Cotton','Soybean']},
+      {min:7.5, max:10, crops:['Sesame','Barley','Guar']}
+    ];
+    const pestsByRegion = {
+      north: ['Aphids','Stem borer','Blast (rice)'],
+      south: ['Leaf folder','Sucking pests','Bacterial blight'],
+      east: ['Stem rot','Gall midge','Brown spot'],
+      west: ['Stem borer','Armyworm','Powdery mildew'],
+      central: ['Armyworm','Aphids','Wilt diseases']
+    };
+    function suggestCrops(ph){ for(const s of cropsByPh) if(ph >= s.min && ph < s.max) return s.crops; return ['Millet','Sorghum']; }
+    function suggestPests(region){ return pestsByRegion[region] || ['General pests: aphids, leaf-eating insects']; }
+
+    const pesticidesByPest = {
+      'Aphids': ['Neem oil spray (azadirachtin-based) - repeat weekly', 'Introduce ladybird beetles / conserve natural enemies', 'Use soap solution for small infestations'],
+      'Stem borer': ['Pheromone traps for monitoring', 'Remove and destroy affected stems', 'Apply appropriate borer-specific insecticide if threshold crossed (follow label)'],
+      'Blast (rice)': ['Use resistant varieties, remove infected stubbles', 'Avoid excess nitrogen; apply Tricyclazole or other local fungicide per guidance'],
+      'Leaf folder': ['Light traps/egg parasitoids where available', 'Use Neem based formulations or Btk for heavy feeding', 'Maintain good field sanitation'],
+      'Sucking pests': ['Spray neem or insecticidal soap', 'Release or conserve predators (lacewings, spiders)', 'Avoid indiscriminate broad-spectrum insecticides'],
+      'Bacterial blight': ['Use disease-free seed, adjust planting time; copper-based sprays as preventive', 'Remove infected plants and improve drainage'],
+      'Stem rot': ['Improve drainage, avoid waterlogging', 'Use Trichoderma or bio-fungicides where suitable'],
+      'Gall midge': ['Early sowing where recommended, collect and destroy galls', 'Consider recommended insecticide at specific phenology stages'],
+      'Brown spot': ['Fungicide application if severe, maintain balanced N-P-K', 'Improve crop residue management'],
+      'Armyworm': ['Handpicking in small fields; bird perches to attract predators', 'Bacillus thuringiensis (Btk) sprays or neem for smallholders'],
+      'Powdery mildew': ['Use sulfur formulations or potassium bicarbonate; remove infected parts', 'Ensure adequate spacing and airflow'],
+      'Wilt diseases': ['Use resistant/tolerant varieties, solarize soil where feasible', 'Avoid infected transplants; rotate crops']
+    };
+
+    function suggestPesticides(pests){
+      const out = [];
+      const added = new Set();
+      pests.forEach(p => {
+        const key = (p || '').toString();
+        for(const k in pesticidesByPest){
+          if(key.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(key.toLowerCase())){
+            pesticidesByPest[k].forEach(sel=>{
+              if(!added.has(sel)){ out.push({pest:k, advice:sel}); added.add(sel); }
+            });
+          }
+        }
+        if(!added.has('IPM: cultural and neem-based control')){
+          out.unshift({pest:'General', advice:'IPM: cultural control, neem-based biopesticides, pheromone traps, and monitoring'}); added.add('IPM: cultural and neem-based control');
+        }
+      });
+      return out;
+    }
+
+    function naiveYieldEstimate(crop, ph, moisture, temp, rain, region){
+      const baseByCrop = {wheat:3200, rice:4000, maize:3500, cotton:1800, groundnut:2500, soybean:2200};
+      let base = baseByCrop[crop] || 2500;
+      const phFactor = 1 - Math.abs(6.8 - ph) * 0.06;
+      const moistureFactor = 1 + ((moisture - 50) / 200);
+      const tempFactor = (temp >= 20 && temp <= 30) ? 1.05 : (temp < 15 || temp > 35 ? 0.85 : 0.95);
+      const rainFactor = 1 + Math.min(0.4, (rain - 500) / 2500);
+      const regionMod = (region === 'south')?1.04:(region==='north')?1.02:1.0;
+      const est = Math.max(0, base * phFactor * moistureFactor * tempFactor * rainFactor * regionMod);
+      return (est/1000).toFixed(1);
+    }
+    function recommendationsFor(crop, ph, moisture){
+      const recs = [];
+      if(moisture < 40) recs.push('Increase irrigation frequency; consider drip irrigation to conserve water.');
+      else if(moisture > 80) recs.push('Check drainage to avoid waterlogging; use raised beds where possible.');
+      else recs.push('Soil moisture is within reasonable range; monitor weekly with simple probes.');
+      if(ph < 6.0) recs.push('Soil acidic — apply lime (calcium carbonate) as recommended by a soil test.');
+      else if(ph > 7.8) recs.push('Soil alkaline — consider gypsum and organic matter to improve nutrient availability.');
+      else recs.push('Soil pH good; continue periodic testing (once per season).');
+      if(crop === 'rice') recs.push('Maintain proper water levels during tillering and transplant at recommended times.');
+      if(crop === 'wheat') recs.push('Apply split nitrogen doses: at sowing and during tillering.');
+      if(crop === 'maize') recs.push('Use row spacing and timely weeding; top-dress with nitrogen during knee height.');
+      recs.push('Adopt integrated pest management: pheromone traps, neem-based biopesticides, and timely scouting.');
+      return recs;
+    }
+
+    // --- Prompt builder (unchanged) ---
+    function buildLovPrompt(data){
+      const telugu = `నేను ఒక రైతును. నా పంట: ${data.cropRaw}. ప్రాంతం: ${data.region}. మట్టి pH: ${data.ph}. మట్టి తేమ: ${data.moisture}%. सగటు ఉష్ణోగ్రత: ${data.temp}°C. వర్షపాతం: ${data.rain} mm. గమనికలు: ${data.notes}.\n\nదయచేసి, తెలుగు భాషలో క్రిందివి ఇవ్వండి:\n1) 3-4 సూచించిన పంటలు మరియు ఎందుకు.\n2) ప్రతి పంటకు ముఖ్యమైన పురుగులు/రోగాలు మరియు తక్కువ ఖర్చు నివారణ చర్యలు.\n3) ప్రతి ముఖ్యమైన పురుగు/రోగానికి సిఫార్సు చేయబడిన తక్కువ-ఖర్చు pesticide / బియోపెస్టిసైడ్ లేదా నిర్వహణ చర్యలు (ఉదాహరణ: నిమ్ ఆయిల్, Btk, pheromone traps, cultural controls).\n4) సరళమైన ఉత్పత్తి అంచనా (tons/ha) మరియు ఎటువంటి మార్పులు చేయాలి.\n5) క్ర‌మబ‌ద్ధంగా చేయవలసిన పనుల చెక్‌లిస్ట్.\n\nఫార్మాట్: JSON వంటి నిర్మాణంలో ఇవ్వండి.`;
+      const english = `I am a farmer. Crop: ${data.cropRaw}. Region: ${data.region}. Soil pH: ${data.ph}. Soil moisture: ${data.moisture}%. Avg temp: ${data.temp} C. Rainfall: ${data.rain} mm. Notes: ${data.notes}.\n\nPlease provide:\n1) 3-4 recommended crops and why.\n2) For each crop, likely pests/diseases and low-cost prevention measures.\n3) For each major pest/disease, recommend low-cost pesticides/biopesticides or IPM measures (examples: neem oil, Btk, pheromone traps, cultural controls).\n4) A simple yield estimate (tons/ha) and actions to improve it.\n5) A step-by-step checklist of actions.\n\nReturn a structured JSON at the end.`;
+      return { telugu, english };
+    }
+
+    // --- Speech synthesis helpers (same) ---
+    const synth = window.speechSynthesis;
+    const voiceSelect = document.getElementById('voiceSelect');
+    const voiceLang = document.getElementById('voiceLang');
+    const rateEl = document.getElementById('rate');
+    const pitchEl = document.getElementById('pitch');
+    const rateVal = document.getElementById('rateVal');
+    const pitchVal = document.getElementById('pitchVal');
+    let voices = [];
+    function populateVoices(){
+      voices = synth.getVoices() || [];
+      voiceSelect.innerHTML = '';
+      voices.forEach((v, i)=>{
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = `${v.name} — ${v.lang}` + (v.default? ' — default' : '');
+        voiceSelect.appendChild(opt);
+      });
+      const preferLang = (voiceLang.value === 'te') ? 'te' : 'en';
+      const idx = voices.findIndex(v => v.lang && v.lang.toLowerCase().startsWith(preferLang));
+      if(idx >= 0) voiceSelect.value = idx;
+    }
+    populateVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = populateVoices;
+
+    function speakText(text, opts = {}) {
+      if(!('speechSynthesis' in window)){
+        alert('Speech Synthesis not supported in this browser.');
+        return;
+      }
+      synth.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      const vIndex = parseInt(voiceSelect.value);
+      if(!isNaN(vIndex) && voices[vIndex]) utter.voice = voices[vIndex];
+      utter.lang = (voiceLang.value === 'te') ? 'te-IN' : 'en-US';
+      utter.rate = parseFloat(rateEl.value) || 1;
+      utter.pitch = parseFloat(pitchEl.value) || 1;
+      synth.speak(utter);
+    }
+
+    document.getElementById('rate').addEventListener('input', ()=> rateVal.textContent = rateEl.value);
+    document.getElementById('pitch').addEventListener('input', ()=> pitchVal.textContent = pitchEl.value);
+
+    document.getElementById('speakBtn').addEventListener('click', ()=>{
+      const header = (lang === 'te') ? 'సారాంశం: ' : 'Summary: ';
+      const yieldText = document.getElementById('yieldVal').textContent;
+      const crops = Array.from(document.getElementById('cropListOut').children).map(li=>li.textContent).join(', ');
+      const pests = Array.from(document.getElementById('pestList').children).map(li=>li.textContent).join(', ');
+      const pesticides = Array.from(document.getElementById('pesticideList').children).map(li=>li.textContent).join('; ');
+      const actions = Array.from(document.getElementById('actionList').children).map((li,i)=>`${i+1}. ${li.textContent}`).join('. ');
+      let full = '';
+      if(lang === 'te'){
+        const p = document.getElementById('lovPrompt').textContent;
+        full = (p && p.trim().length>0) ? p : `${header} పాదవివరాలు: ${yieldText}. సూచించిన పంటలు: ${crops}. సంభావ్య పురుగులు: ${pests}. pesticide సూచనలు: ${pesticides}. సూచనలు: ${actions}`;
+      } else {
+        const p = document.getElementById('lovPrompt').textContent;
+        full = (p && p.trim().length>0) ? p : `${header} Predicted yield: ${yieldText}. Recommended crops: ${crops}. Likely pests/diseases: ${pests}. Pesticide/IPM suggestions: ${pesticides}. Actions: ${actions}`;
+      }
+      speakText(full);
+    });
+    document.getElementById('stopBtn').addEventListener('click', ()=> synth.cancel());
+    document.getElementById('readSummaryBtn').addEventListener('click', ()=>{
+      const yieldText = document.getElementById('yieldVal').textContent;
+      const crops = Array.from(document.getElementById('cropListOut').children).slice(0,3).map(li=>li.textContent).join(', ');
+      const pesticide = document.getElementById('pesticideList').children[0] ? document.getElementById('pesticideList').children[0].textContent : '';
+      const action = document.getElementById('actionList').children[0] ? document.getElementById('actionList').children[0].textContent : '';
+      const short = (lang==='te') ? `అంచనా పంట దిగుబడి ${yieldText}. సూచించిన పంటలు ${crops}. మొదటి pesticide సూచన: ${pesticide}. మొదటి చర్య: ${action}` : `Estimated yield ${yieldText}. Recommended crops ${crops}. First pesticide suggestion: ${pesticide}. First action: ${action}`;
+      speakText(short);
+    });
+
+    // Normalize crop input
+    function normalizeCrop(raw){
+      if(!raw) return '';
+      const r = raw.trim().toLowerCase();
+      const map = {'paddy':'rice','rice':'rice','maize':'maize','corn':'maize','wheat':'wheat','potato':'potato','groundnut':'groundnut','peanut':'groundnut','soybean':'soybean','soy':'soybean','cotton':'cotton','tomato':'tomato','chilli':'chilli','chili':'chilli','millet':'millet','bajra':'bajra','jowar':'sorghum','sorghum':'sorghum','ragi':'ragi','finger millet':'ragi','barley':'barley','sesame':'sesame','sugarcane':'sugarcane','sunflower':'sunflower','maize (corn)':'maize'};
+      if(map[r]) return map[r];
+      const simple = r.replace(/\s*\(.*\)\s*/g,'').split(/,| - /)[0].trim();
+      if(map[simple]) return map[simple];
+      const known = ['wheat','rice','maize','cotton','groundnut','soybean'];
+      if(known.includes(simple)) return simple;
+      return simple;
+    }
+
+    // Predict button logic
+    predictBtn.addEventListener('click', ()=> {
+      const hasImage = imagePreview.src && imagePreview.style.display !== 'none';
+      if(hasImage && !plantValidated){
+        alert('Attached image was rejected as not a plant. Please upload/capture a valid plant photo or remove the image.');
+        return;
+      }
+
+      const cropRaw = document.getElementById('crop').value;
+      const cropKey = normalizeCrop(cropRaw);
+      const region = document.getElementById('region').value;
+      const ph = parseFloat(document.getElementById('ph').value);
+      const moisture = parseFloat(document.getElementById('moisture').value);
+      const temp = parseFloat(document.getElementById('temp').value);
+      const rain = parseFloat(document.getElementById('rain').value);
+      const notes = document.getElementById('notes').value || '';
+
+      if(!cropRaw || !region || isNaN(ph) || isNaN(moisture) || isNaN(temp) || isNaN(rain)){
+        alert('Please fill all required fields');
+        return;
+      }
+
+      const cropSuggestions = suggestCrops(ph).slice(0,4);
+      const pestSuggestions = suggestPests(region);
+      const pesticides = suggestPesticides(pestSuggestions);
+      const estYield = naiveYieldEstimate(cropKey, ph, moisture, temp, rain, region);
+      const recs = recommendationsFor(cropKey, ph, moisture);
+
+      document.getElementById('yieldVal').textContent = `${estYield} tons/ha`;
+      document.getElementById('yieldNote').textContent = 'Estimated (naive). For higher accuracy, call an LLM or ML model with local data.';
+
+      const cropListOut = document.getElementById('cropListOut'); cropListOut.innerHTML = '';
+      cropSuggestions.forEach(c=>{ const li=document.createElement('li'); li.textContent = c; cropListOut.appendChild(li); });
+
+      const pestList = document.getElementById('pestList'); pestList.innerHTML = '';
+      pestSuggestions.forEach(p=>{ const li=document.createElement('li'); li.textContent = p; pestList.appendChild(li); });
+
+      const pesticideList = document.getElementById('pesticideList'); pesticideList.innerHTML = '';
+      if(pesticides && pesticides.length){
+        pesticides.forEach(p=>{
+          const li = document.createElement('li');
+          li.textContent = `${p.pest}: ${p.advice}`;
+          pesticideList.appendChild(li);
+        });
+      } else {
+        const li = document.createElement('li');
+        li.textContent = 'General IPM: monitoring, neem/bio options, cultural controls.';
+        pesticideList.appendChild(li);
+      }
+
+      const actionList = document.getElementById('actionList'); actionList.innerHTML = '';
+      recs.forEach(r=>{ const li=document.createElement('li'); li.textContent = r; actionList.appendChild(li); });
+
+      const prompt = buildLovPrompt({cropRaw, region, ph, moisture, temp, rain, notes});
+      document.getElementById('lovPrompt').textContent = `--- Telugu Prompt ---\n${prompt.telugu}\n\n--- English Prompt ---\n${prompt.english}`;
+      document.getElementById('lovPrompt').scrollIntoView({behavior:'smooth'});
+    });
+
+    // ========== Camera / upload & Plant validation ==========
+    const openCameraBtn = document.getElementById('openCameraBtn');
+    const captureBtn = document.getElementById('captureBtn');
+    const stopCameraBtn = document.getElementById('stopCameraBtn');
+    const video = document.getElementById('videoPreview');
+    const imagePreview = document.getElementById('imagePreview');
+    const imageUpload = document.getElementById('imageUpload');
+    const cameraCanvas = document.createElement('canvas'); // offscreen canvas for capture
+    let cameraStream = null;
+
+    let lastUploadedFile = null; // File object if user uploaded
+    let lastDataUrl = null; // Data URL if captured from camera
+
+    async function startCamera(){
+      showCameraError('');
+      setCameraStatus('');
+      if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+        showCameraError('Camera not supported. Please use a modern browser or upload an image.');
+        return;
+      }
+      try{
+        const constraints = { video: { facingMode: { ideal: 'environment' } }, audio: false };
+        cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = cameraStream;
+        video.style.display = 'block';
+        imagePreview.style.display = 'none';
+        captureBtn.disabled = false;
+        stopCameraBtn.disabled = false;
+        openCameraBtn.disabled = true;
+      }catch(err){
+        let msg = 'Could not access camera.';
+        if(err.name === 'NotAllowedError') msg = 'Camera permission denied. Allow camera to take photo.';
+        else if(err.name === 'NotFoundError') msg = 'No camera device found.';
+        else msg = 'Camera error: ' + (err.message || err.name);
+        showCameraError(msg);
+        console.error(err);
+      }
+    }
+
+    function stopCamera(){
+      if(cameraStream){
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+      }
+      video.srcObject = null;
+      video.style.display = 'none';
+      captureBtn.disabled = true;
+      stopCameraBtn.disabled = true;
+      openCameraBtn.disabled = false;
+    }
+
+    function captureImage(){
+      if(!cameraStream){
+        showCameraError('Camera not active.');
+        return;
+      }
+      const track = cameraStream.getVideoTracks()[0];
+      const settings = track.getSettings ? track.getSettings() : {};
+      const w = video.videoWidth || settings.width || 640;
+      const h = video.videoHeight || settings.height || 480;
+      cameraCanvas.width = w;
+      cameraCanvas.height = h;
+      const ctx = cameraCanvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, w, h);
+      const dataUrl = cameraCanvas.toDataURL('image/jpeg', 0.85);
+      imagePreview.src = dataUrl;
+      imagePreview.style.display = 'block';
+      lastDataUrl = dataUrl;
+      lastUploadedFile = null;
+      // stop camera to avoid multiple streams and power usage
+      stopCamera();
+      // Validate the captured image
+      validatePlantImageDataUrl(dataUrl);
+    }
+
+    openCameraBtn.addEventListener('click', startCamera);
+    captureBtn.addEventListener('click', captureImage);
+    stopCameraBtn.addEventListener('click', stopCamera);
+
+    // file upload preview handler
+    imageUpload.addEventListener('change', async (e)=>{
+      showCameraError('');
+      setCameraStatus('');
+      const file = e.target.files && e.target.files[0];
+      if(!file) return;
+      if(!file.type.startsWith('image/')) { showCameraError('Please upload a valid image file.'); return; }
+      lastUploadedFile = file;
+      lastDataUrl = null;
+      const reader = new FileReader();
+      reader.onload = async () => {
+        imagePreview.src = reader.result;
+        imagePreview.style.display = 'block';
+        // stop camera if it was running
+        stopCamera();
+        // Validate image
+        await validatePlantImageFile(file);
+      };
+      reader.onerror = () => showCameraError('Could not read uploaded file.');
+      reader.readAsDataURL(file);
+    });
+
+    if(!window.isSecureContext){
+      showCameraError('Camera may not work because this page is not served over HTTPS or localhost. Upload still works.');
+    }
+    window.addEventListener('beforeunload', ()=> stopCamera());
+
+    // ========== Plant validation functions ==========
+    async function validatePlantImageFile(file){
+      const dataUrl = await fileToDataUrl(file);
+      return validatePlantImageDataUrl(dataUrl);
+    }
+
+    async function validatePlantImageDataUrl(dataUrl){
+      setCameraStatus('Analyzing image...');
+      showCameraError('');
+      plantValidated = false;
+      updatePredictState();
+
+      // If PLANT_ID_API_KEY provided, try Plant.id call
+      if(PLANT_ID_API_KEY && PLANT_ID_API_KEY.trim().length > 0){
+        try {
+          const base64 = dataUrl.split(',')[1];
+          const resp = await fetch('https://api.plant.id/v3/identify', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'Api-Key': PLANT_ID_API_KEY},
+            body: JSON.stringify({
+              images: [base64],
+              modifiers: ["crops_fast","similar_images"],
+              plant_language: "en",
+              plant_details: ["common_names"]
+            })
+          });
+          if(!resp.ok){
+            console.warn('Plant.id API non-ok', resp.status);
+            // fallback to offline
+            return validatePlantOffline(dataUrl, 'Plant.id API error — using offline heuristic');
+          }
+          const data = await resp.json();
+          const suggestions = data.suggestions || [];
+          if(suggestions.length === 0){
+            setPlantValidation(false, 'Plant.id returned no suggestions');
+            return false;
+          }
+          const top = suggestions[0];
+          const confidence = top.probability ?? 0;
+          if(confidence >= PLANT_ID_CONFIDENCE_THRESHOLD){
+            setPlantValidation(true, `Plant.id: ${(confidence*100).toFixed(0)}%`);
+            return true;
+          } else {
+            setPlantValidation(false, `Low Plant.id confidence ${(confidence*100).toFixed(0)}%`);
+            return false;
+          }
+        } catch (err) {
+          console.error('Plant.id API error', err);
+          return validatePlantOffline(dataUrl, 'Plant.id API error — using offline heuristic');
+        }
+      } else {
+        // Offline heuristic
+        return validatePlantOffline(dataUrl, 'Offline heuristic');
+      }
+    }
+
+    function fileToDataUrl(file){
+      return new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result);
+        r.onerror = rej;
+        r.readAsDataURL(file);
+      });
+    }
+
+    // Offline green-dominance heuristic
+    async function validatePlantOffline(dataUrl, reason=''){
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const W = 160;
+          const ratio = img.width / img.height || 1;
+          cameraCanvas.width = W;
+          cameraCanvas.height = Math.round(W / ratio);
+          const ctx = cameraCanvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, cameraCanvas.width, cameraCanvas.height);
+          const data = ctx.getImageData(0,0,cameraCanvas.width,cameraCanvas.height).data;
+          let greenCount = 0;
+          const total = cameraCanvas.width * cameraCanvas.height;
+          for(let i=0;i<data.length;i+=4){
+            const r = data[i], g = data[i+1], b = data[i+2];
+            if(g > 90 && g > r + 20 && g > b + 20) greenCount++;
+          }
+          const greenRatio = greenCount / total;
+          if(greenRatio >= GREEN_RATIO_THRESHOLD){
+            setPlantValidation(true, `${reason} — green ${(greenRatio*100).toFixed(1)}%`);
+            resolve(true);
+          } else {
+            setPlantValidation(false, `${reason} — green ${(greenRatio*100).toFixed(1)}%`);
+            resolve(false);
+          }
+        };
+        img.onerror = () => {
+          showCameraError('Error analyzing image.');
+          setPlantValidation(false, 'analysis failed');
+          resolve(false);
+        };
+        img.src = dataUrl;
+      });
+    }
+
+    // ========== Voice & misc ==========
+    const voiceLangEl = document.getElementById('voiceLang');
+    if(voiceLangEl){
+      voiceLangEl.addEventListener('change', ()=> {
+        if(typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined){
+          populateVoices();
+        }
+      });
+    }
+
+    // init
+    updatePredictState();
+  </script>
+</body>
+</html>

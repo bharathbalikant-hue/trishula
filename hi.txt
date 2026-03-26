@@ -1,0 +1,16 @@
+left: 364px;
+    bottom: 39px
+const key="be4068df7982fb59099ba97916f436ea"
+const url=`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${key}`
+bt.addEventListener("click",function(){
+  co.style.display="none"
+  bt.style.display="block"
+  bt.style.left="364px"
+  bt.style.bottom='39px'
+  ip.style.display="block"
+  cont.style.height="100px"
+
+
+});
+left: 362px;
+    bottom: 38px;
